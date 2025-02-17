@@ -1,5 +1,13 @@
 import streamlit as st
 from datetime import datetime, timezone
+from lib.salable import (
+    check_license_for_user,
+)
+
+def back_to_home():
+    home1, home2, home3 = st.columns(3)
+    with home2:
+        st.page_link("home.py", label="Back to Home")
 
 def profile_sidebar():
     with st.sidebar:
@@ -26,17 +34,22 @@ def main():
             st.stop()
     else:
         profile_sidebar()
-        st.title("Welcome to Streamlit")
-        col1, col2 = st.columns(2)
-
+        col1, col2 = st.columns(2, gap="medium")
         with col1:
-            st.header("View your Profile")
-            st.page_link("pages/profile.py", label="User Profile")
+            st.header("Clerk Profile")
+            st.write(st.experimental_user.email)
+            st.write(st.experimental_user.to_dict())
 
-        with col2:
-            st.header("View your Product")
-            st.page_link("pages/features.py", label="Product Features")
-            
+        try:
+            # Use the grantee_id from the current user as the license check identifier
+            grantee_id = st.experimental_user.email
+            license_info = check_license_for_user(grantee_id)
+            with col2:
+                st.header("Salable Licenses")
+                st.write(license_info)
+        except Exception as e:
+            st.error(f"Error checking license: {e}")
+    back_to_home()
 
 if __name__ == '__main__':
     main()
