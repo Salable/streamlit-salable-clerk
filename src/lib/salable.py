@@ -55,7 +55,7 @@ def get_subscription_status() -> dict:
     response.raise_for_status()
     return response.json()
 
-def check_license_for_user(grantee_id: str) -> dict:
+def get_licenses_for_grantee(grantee_id: str) -> dict:
     """
     Checks the license(s) associated with the grantee_id.
     
@@ -63,25 +63,27 @@ def check_license_for_user(grantee_id: str) -> dict:
     Query Parameter:
       grantee_id - the ID of the current user
     """
-    url = f"{BASE_URL}/licenses"
-    params = {"grantee_id": grantee_id}
-    response = requests.get(url, headers=HEADERS, params=params)
-    response.raise_for_status()
-    return response.json()
+    url = f"{BASE_URL}/licenses/granteeId/{grantee_id}"
+    response = requests.get(url, headers=HEADERS)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return []
 
 def get_capabilities_for_grantee(grantee_id: str) -> dict:
     """
     Retrieves the current capabilities that a grantee has for the current product.
 
-    Endpoint: GET /products/{productUuid}/capabilities
+    Endpoint: GET /licenses/check
     Query Parameter:
       granteeId - the unique identifier for the grantee.
     """
-    url = f"{BASE_URL}/products/{PRODUCT_UUID}/capabilities"
-    params = {"granteeId": grantee_id}
-    response = requests.get(url, headers=HEADERS, params=params)
-    response.raise_for_status()
-    return response.json()
+    url = f"{BASE_URL}/licenses/check?granteeIds={grantee_id}&productUuid={PRODUCT_UUID}"
+    response = requests.get(url, headers=HEADERS)
+    if response.status_code == 200:
+        return response.json()["capabilities"]
+    else:
+        return []
 
 if __name__ == "__main__":
     # For testing purposes only. This block will not run when imported as a library.
@@ -93,7 +95,7 @@ if __name__ == "__main__":
 
     try:
         print("Initiating Purchase:")
-        print(initiate_purchase())
+        print(get_checkout_link())
     except Exception as e:
         print("Error initiating purchase:", e)
 

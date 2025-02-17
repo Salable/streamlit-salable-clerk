@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime, timezone
 from lib.salable import (
-    check_license_for_user,
+    get_licenses_for_grantee,
 )
 from lib.sidepanel import (
     profile_sidebar,
@@ -25,7 +25,7 @@ def main():
         try:
             # Use the grantee_id from the current user as the license check identifier
             grantee_id = st.experimental_user.email
-            license_info = check_license_for_user(grantee_id)
+            license_info = get_licenses_for_grantee(grantee_id)
             with col2:
                 st.header("Salable Licenses")
                 st.write(license_info)
