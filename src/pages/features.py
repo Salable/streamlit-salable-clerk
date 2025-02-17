@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import datetime, timezone
 from lib.salable import (
-    get_capabilities_for_grantee
+    get_capabilities_for_grantee,
+    get_checkout_link
 )
 
 def back_to_home():
@@ -38,8 +39,12 @@ def main():
             grantee_id = st.experimental_user.email
             capabilities = get_capabilities_for_grantee(grantee_id)
             st.write("Your Capabilities for the Current Product:")
-            for cap in capabilities:
-                st.write(cap["name"])
+            if not capabilities:
+                st.write("No product features are enabled. You can purchase a license to unlock features.")
+                st.link_button(url=get_checkout_link(st.experimental_user.email)["checkoutUrl"], label="Buy Now")
+            else: 
+                for cap in capabilities:
+                    st.write(cap["name"])
         except Exception as e:
             st.error(f"Error fetching capabilities: {e}")
     back_to_home()

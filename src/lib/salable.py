@@ -7,10 +7,11 @@ BASE_URL = "https://api.salable.app"
 API_KEY = os.environ.get("SALABLE_API_KEY")
 PRODUCT_UUID = os.environ.get("SALABLE_PRODUCT_UUID")
 PLAN_UUID = os.environ.get("SALABLE_PLAN_UUID")
+SUCCESS_URL = os.environ.get("SALABLE_SUCCESS_URL")
 
-if not API_KEY or not PRODUCT_UUID or not PLAN_UUID:
+if not API_KEY or not PRODUCT_UUID or not PLAN_UUID or not SUCCESS_URL:
     raise EnvironmentError(
-        "One or more required environment variables are missing: SALABLE_API_KEY, SALABLE_PRODUCT_UUID, SALABLE_PLAN_UUID"
+        "One or more required environment variables are missing: SALABLE_API_KEY, SALABLE_PRODUCT_UUID, SALABLE_PLAN_UUID, SUCCESS_URL"
     )
 
 # Common headers for all requests
@@ -30,19 +31,16 @@ def check_license(license_uuid: str) -> dict:
     response.raise_for_status()
     return response.json()
 
-def initiate_purchase() -> dict:
+def get_checkout_link(grantee_id: str) -> dict:
     """
     Initiates a purchase using Salable's pricing table session.
     
-    Endpoint: POST /sessions/pricing-table
+    Endpoint: GET /plans/{planUuid}/checkoutlink
     Payload includes the product and plan identifiers.
     """
-    url = f"{BASE_URL}/sessions/pricing-table"
-    payload = {
-        "productUuid": PRODUCT_UUID,
-        "planUuid": PLAN_UUID
-    }
-    response = requests.post(url, json=payload, headers=HEADERS)
+    url = f"{BASE_URL}/plans/{PLAN_UUID}/checkoutlink?successUrl={SUCCESS_URL}&cancelUrl={SUCCESS_URL}&granteeId={grantee_id}&member={grantee_id}"
+
+    response = requests.get(url, headers=HEADERS)
     response.raise_for_status()
     return response.json()
 
